@@ -1,0 +1,8 @@
+// PARA PERCORRER STRUCT E MOSTRAR VALORES
+tt := reflect.ValueOf(&troca).Elem()
+		typeOfT := tt.Type()
+
+		for i := 0; i < tt.NumField(); i++ {
+			f := tt.Field(i)
+			fmt.Println(typeOfT.Field(i).Name, f.Type(), f.Interface())
+		}

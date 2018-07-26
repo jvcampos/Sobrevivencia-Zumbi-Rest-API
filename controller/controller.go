@@ -3,8 +3,9 @@ package controller
 import (
 	"aplicacoes/projeto-zumbie/config"
 	"encoding/json"
-	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // APP ...
@@ -19,7 +20,7 @@ type APP struct {
 type Sobreviventes struct {
 	Codigo     uint        `json:"codigosobrevivente"`
 	Nome       string      `json:"nome"`
-	Idade      int         `json:""idade`
+	Idade      int         `json:"idade"`
 	Genero     string      `json:"genero"`
 	Infectado  bool        `json:"infectado"`
 	Inventario Inventarios `json:"inventario"`
@@ -33,9 +34,15 @@ type Inventarios struct {
 	Municao     int `json:"municao"`
 }
 
+// Trocas ...
+type Trocas struct {
+	Sobrevivente Sobreviventes `json:"sobrevivente"`
+}
+
 var app []APP
 var sobreviventes []Sobreviventes
 var inventarios []Inventarios
+var trocas []Trocas
 var db = config.DB // var do banco
 var versao int64
 var descricao, data, linguagem string
@@ -118,8 +125,6 @@ func AdicionarNovoSobrevivente(w http.ResponseWriter, r *http.Request) {
 	querySobrevivente := "INSERT INTO sobrevivente (nome,idade,genero,infectado) VALUES(?,?,?,?)"
 	queryInventario := "INSERT INTO inventario (codigosobrevivente, agua, comida, medicamento, municao) VALUES (LAST_INSERT_ID(), ?, ?, ?, ?);"
 
-	fmt.Println(query)
-
 	stmt, err := db.Prepare(querySobrevivente)
 	CheckError(err)
 	_, err = stmt.Exec(nome, idade, genero, infectado)
@@ -128,6 +133,45 @@ func AdicionarNovoSobrevivente(w http.ResponseWriter, r *http.Request) {
 	stmt, err = db.Prepare(queryInventario)
 	CheckError(err)
 	_, err = stmt.Exec(agua, comida, medicamento, municao)
+
+	json.NewEncoder(w).Encode("Sobrevivente adicionado !!")
+
+}
+
+// BuscarSobreviventes ...
+func BuscarSobreviventes(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	sobrevivente1 := mux.Vars(r)["sobrevivente1"]
+	sobrevivente2 := mux.Vars(r)["sobrevivente2"]
+
+	query = "(SELECT sobrevivente.codigo, nome, idade, genero, infectado, " +
+		"agua, comida, medicamento, municao " +
+		"FROM sobrevivente, inventario" +
+		" WHERE " +
+		"sobrevivente.codigo = ? AND inventario.codigosobrevivente = ?) " +
+		"UNION" +
+		" (SELECT sobrevivente.codigo, nome, idade, genero, infectado, " +
+		"agua, comida, medicamento, municao " +
+		"FROM sobrevivente, inventario" +
+		" WHERE " +
+		"sobrevivente.codigo = ? AND inventario.codigosobrevivente = ?) "
+
+	rows, err := db.Query(query, sobrevivente1, sobrevivente1, sobrevivente2, sobrevivente2)
+	CheckError(err)
+
+	trocas = trocas[:0]
+	troca := Trocas{}
+
+	for rows.Next() {
+		rows.Scan(&troca.Sobrevivente.Codigo, &troca.Sobrevivente.Nome, &troca.Sobrevivente.Idade,
+			&troca.Sobrevivente.Genero, &troca.Sobrevivente.Infectado, &troca.Sobrevivente.Inventario.Agua,
+			&troca.Sobrevivente.Inventario.Comida, &troca.Sobrevivente.Inventario.Medicamento,
+			&troca.Sobrevivente.Inventario.Municao)
+		trocas = append(trocas, troca)
+	}
+
+	json.NewEncoder(w).Encode(trocas)
 
 }
 
