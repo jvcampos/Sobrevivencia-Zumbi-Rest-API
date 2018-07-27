@@ -7,7 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var DB, err = sql.Open("mysql", "jv:xxx@/db_apocalipse")
+var DB, err = sql.Open("mysql", "jv:libra2010@/db_apocalipse")
 
 func TryConn() {
 	if err != nil {

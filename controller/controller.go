@@ -3,6 +3,7 @@ package controller
 import (
 	"aplicacoes/projeto-zumbie/config"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -36,12 +37,21 @@ type Inventarios struct {
 
 // Trocas ...
 type Trocas struct {
-	Sobrevivente Sobreviventes `json:"sobrevivente"`
+	Sobrevivente1 Sobreviventes
+	Sobrevivente2 Sobreviventes
+}
+
+// ErroTroca ...
+type ErroTroca struct {
+	NomeSobrevivente string `json:"nomesobrevivente"`
+	Mensagem         string `json:"mensagem"`
 }
 
 var app []APP
 var sobreviventes []Sobreviventes
 var inventarios []Inventarios
+var errotroca []ErroTroca
+var inventarioS1 int
 var trocas []Trocas
 var db = config.DB // var do banco
 var versao int64
@@ -160,18 +170,121 @@ func BuscarSobreviventes(w http.ResponseWriter, r *http.Request) {
 	rows, err := db.Query(query, sobrevivente1, sobrevivente1, sobrevivente2, sobrevivente2)
 	CheckError(err)
 
-	trocas = trocas[:0]
-	troca := Trocas{}
+	sobreviventes = sobreviventes[:0]
+	sobrevivente := Sobreviventes{}
 
 	for rows.Next() {
-		rows.Scan(&troca.Sobrevivente.Codigo, &troca.Sobrevivente.Nome, &troca.Sobrevivente.Idade,
-			&troca.Sobrevivente.Genero, &troca.Sobrevivente.Infectado, &troca.Sobrevivente.Inventario.Agua,
-			&troca.Sobrevivente.Inventario.Comida, &troca.Sobrevivente.Inventario.Medicamento,
-			&troca.Sobrevivente.Inventario.Municao)
-		trocas = append(trocas, troca)
+		rows.Scan(&sobrevivente.Codigo, &sobrevivente.Nome, &sobrevivente.Idade,
+			&sobrevivente.Genero, &sobrevivente.Infectado, &sobrevivente.Inventario.Agua,
+			&sobrevivente.Inventario.Comida, &sobrevivente.Inventario.Medicamento,
+			&sobrevivente.Inventario.Municao)
+		sobreviventes = append(sobreviventes, sobrevivente)
 	}
 
-	json.NewEncoder(w).Encode(trocas)
+	json.NewEncoder(w).Encode(sobreviventes)
+
+}
+
+// RealizarTroca ...
+func RealizarTroca(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	trocas = trocas[:0]
+	errotroca = errotroca[:0]
+
+	troca := Trocas{}
+	erroTroca := ErroTroca{}
+	// sobrevivente := Sobreviventes{}
+
+	_ = json.NewDecoder(r.Body).Decode(&troca)
+	trocas = append(trocas, troca)
+
+	codigoSobrevivente1 := troca.Sobrevivente1.Codigo
+	s1 := troca.Sobrevivente1
+
+	// codigoSobrevivente2 := troca.Sobrevivente2.Codigo
+
+	for _, s := range sobreviventes {
+		if s.Codigo == codigoSobrevivente1 {
+			// Aqui to tentando recuperar os valores dos alimentos...
+			if s1.Inventario.Agua > 0 {
+				fmt.Println("Agua será trocada !!")
+				inventarioS1 = s1.Inventario.Agua
+				if inventarioS1 != s.Inventario.Comida {
+					erroTroca.NomeSobrevivente = s.Nome
+					erroTroca.Mensagem = "Não possui água suficiente !! ;("
+					json.NewEncoder(w).Encode(erroTroca)
+				}
+			} else {
+
+			}
+			if s1.Inventario.Comida > 0 {
+				fmt.Println("comida será trocada !!")
+				inventarioS1 = s1.Inventario.Comida
+				if inventarioS1 != s.Inventario.Comida {
+					erroTroca.NomeSobrevivente = s.Nome
+					erroTroca.Mensagem = "Não possui comida suficiente !! ;("
+					json.NewEncoder(w).Encode(erroTroca)
+				}
+			} else {
+
+			}
+			if s1.Inventario.Medicamento > 0 {
+				fmt.Println("Medicamento será trocada !!")
+				inventarioS1 = s1.Inventario.Medicamento
+				if inventarioS1 != s.Inventario.Medicamento {
+					erroTroca.NomeSobrevivente = s.Nome
+					erroTroca.Mensagem = "Não possui medicamento suficiente !! ;("
+					json.NewEncoder(w).Encode(erroTroca)
+				}
+			} else {
+
+			}
+			if s1.Inventario.Municao > 0 {
+				fmt.Println("Munição será trocada !!")
+				inventarioS1 = s1.Inventario.Municao
+				if inventarioS1 != s.Inventario.Municao {
+					erroTroca.NomeSobrevivente = s.Nome
+					erroTroca.Mensagem = "Não possui munição suficiente !! ;("
+					json.NewEncoder(w).Encode(erroTroca)
+				}
+			} else {
+
+			}
+		}
+	}
+
+	// for _, s := range sobreviventes {
+	// 	if s.Codigo == codigoSobrevivente1 {
+	// 		// fmt.Println(s.Inventario)
+	// 		Inventario := reflect.ValueOf(&troca.Sobrevivente1.Inventario).Elem()
+	// 		fmt.Println("---> ", Inventario)
+	// 		tipoAlimento := Inventario.Type()
+	// 		// Aqui to tentando recuperar os valores dos alimentos...
+	// 		for i := 0; i < Inventario.NumField(); i++ {
+	// 			switch tipoAlimento.Field(i).Name {
+	// 			case "Agua":
+	// 				valorInventario := Inventario.Field(i)
+	// 				var v
+	// 				v = reflect.Value(valorInventario)
+	// 				fmt.Println(valorI)
+	// 				// if valorI > 0 {
+	// 				// }
+	// 			case "Comida":
+	// 				// valorInventario := Inventario.Field(i)
+	// 				// fmt.Println(valorInventario)
+	// 				// if valorInventario.Kind() == 0 {
+	// 				// 	fmt.Println("Não tem agua...")
+	// 				// }
+	// 			}
+	// 		}
+	// 	}
+	// 	if s.Codigo == codigoSobrevivente2 {
+	// 		// fmt.Println(s.Inventario)
+	// 	}
+	// }
+	// fmt.Println(troca.Sobrevivente1.Inventario)
+	// fmt.Println(troca.Sobrevivente2.Inventario)
 
 }
 

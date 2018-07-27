@@ -23,6 +23,7 @@ func HandleFunc() {
 	rotas.HandleFunc("/api/sobreviventes", controller.BuscarTodosSobrevivente).Methods("GET")
 	rotas.HandleFunc("/api/adicionar/sobrevivente", controller.AdicionarNovoSobrevivente).Methods("POST")
 	rotas.HandleFunc("/api/sobrevivente/{sobrevivente1}/{sobrevivente2}", controller.BuscarSobreviventes).Methods("GET")
+	rotas.HandleFunc("/api/trocar", controller.RealizarTroca).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(portaAplicacao, rotas))
 }

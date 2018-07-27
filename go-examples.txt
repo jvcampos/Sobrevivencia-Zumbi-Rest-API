@@ -6,3 +6,10 @@ tt := reflect.ValueOf(&troca).Elem()
 			f := tt.Field(i)
 			fmt.Println(typeOfT.Field(i).Name, f.Type(), f.Interface())
 		}
+
+// PARA PERCORRER STRUCT E PROCURAR VALORES
+		for _, sobrevivente := range (seu_struct) {
+		if sobrevivente.Sobrevivente.Codigo == 3 {
+			fmt.Println("achei...")
+		}
+	}
