@@ -52,6 +52,7 @@ var sobreviventes []Sobreviventes
 var inventarios []Inventarios
 var errotroca []ErroTroca
 var inventarioS1 int
+var inventarioS2 int
 var trocas []Trocas
 var db = config.DB // var do banco
 var versao int64
@@ -200,9 +201,9 @@ func RealizarTroca(w http.ResponseWriter, r *http.Request) {
 	trocas = append(trocas, troca)
 
 	codigoSobrevivente1 := troca.Sobrevivente1.Codigo
+	codigoSobrevivente2 := troca.Sobrevivente2.Codigo
 	s1 := troca.Sobrevivente1
-
-	// codigoSobrevivente2 := troca.Sobrevivente2.Codigo
+	s2 := troca.Sobrevivente2
 
 	for _, s := range sobreviventes {
 		if s.Codigo == codigoSobrevivente1 {
@@ -210,82 +211,132 @@ func RealizarTroca(w http.ResponseWriter, r *http.Request) {
 			if s1.Inventario.Agua > 0 {
 				fmt.Println("Agua será trocada !!")
 				inventarioS1 = s1.Inventario.Agua
-				if inventarioS1 != s.Inventario.Comida {
+				if inventarioS1 > s.Inventario.Comida {
 					erroTroca.NomeSobrevivente = s.Nome
 					erroTroca.Mensagem = "Não possui água suficiente !! ;("
 					json.NewEncoder(w).Encode(erroTroca)
 				}
-			} else {
-
 			}
 			if s1.Inventario.Comida > 0 {
 				fmt.Println("comida será trocada !!")
 				inventarioS1 = s1.Inventario.Comida
-				if inventarioS1 != s.Inventario.Comida {
+				if inventarioS1 > s.Inventario.Comida {
 					erroTroca.NomeSobrevivente = s.Nome
 					erroTroca.Mensagem = "Não possui comida suficiente !! ;("
 					json.NewEncoder(w).Encode(erroTroca)
 				}
-			} else {
-
 			}
 			if s1.Inventario.Medicamento > 0 {
 				fmt.Println("Medicamento será trocada !!")
 				inventarioS1 = s1.Inventario.Medicamento
-				if inventarioS1 != s.Inventario.Medicamento {
+				if inventarioS1 > s.Inventario.Medicamento {
 					erroTroca.NomeSobrevivente = s.Nome
 					erroTroca.Mensagem = "Não possui medicamento suficiente !! ;("
 					json.NewEncoder(w).Encode(erroTroca)
 				}
-			} else {
-
 			}
 			if s1.Inventario.Municao > 0 {
 				fmt.Println("Munição será trocada !!")
 				inventarioS1 = s1.Inventario.Municao
-				if inventarioS1 != s.Inventario.Municao {
+				if inventarioS1 > s.Inventario.Municao {
 					erroTroca.NomeSobrevivente = s.Nome
 					erroTroca.Mensagem = "Não possui munição suficiente !! ;("
 					json.NewEncoder(w).Encode(erroTroca)
 				}
-			} else {
+			}
 
+		}
+	}
+
+	for _, s := range sobreviventes {
+		if s.Codigo == codigoSobrevivente2 {
+			// Aqui to tentando recuperar os valores dos alimentos...
+			if s2.Inventario.Agua > 0 {
+				fmt.Println("Agua será trocada !!")
+				inventarioS2 = s2.Inventario.Agua
+				if inventarioS2 > s.Inventario.Comida {
+					erroTroca.NomeSobrevivente = s2.Nome
+					erroTroca.Mensagem = "Não possui água suficiente !! ;("
+					json.NewEncoder(w).Encode(erroTroca)
+				}
+			}
+			if s2.Inventario.Comida > 0 {
+				fmt.Println("comida será trocada !!")
+				inventarioS2 = s2.Inventario.Comida
+				if inventarioS2 > s.Inventario.Comida {
+					erroTroca.NomeSobrevivente = s2.Nome
+					erroTroca.Mensagem = "Não possui comida suficiente !! ;("
+					json.NewEncoder(w).Encode(erroTroca)
+				}
+			}
+			if s2.Inventario.Medicamento > 0 {
+				fmt.Println("Medicamento será trocada !!")
+				inventarioS2 = s2.Inventario.Medicamento
+				if inventarioS2 > s.Inventario.Medicamento {
+					erroTroca.NomeSobrevivente = s2.Nome
+					erroTroca.Mensagem = "Não possui medicamento suficiente !! ;("
+					json.NewEncoder(w).Encode(erroTroca)
+				}
+			}
+			if s2.Inventario.Municao > 0 {
+				fmt.Println("Munição será trocada !!")
+				inventarioS2 = s2.Inventario.Municao
+				if inventarioS2 > s.Inventario.Municao {
+					erroTroca.NomeSobrevivente = s2.Nome
+					erroTroca.Mensagem = "Não possui munição suficiente !! ;("
+					json.NewEncoder(w).Encode(erroTroca)
+				}
 			}
 		}
 	}
 
-	// for _, s := range sobreviventes {
-	// 	if s.Codigo == codigoSobrevivente1 {
-	// 		// fmt.Println(s.Inventario)
-	// 		Inventario := reflect.ValueOf(&troca.Sobrevivente1.Inventario).Elem()
-	// 		fmt.Println("---> ", Inventario)
-	// 		tipoAlimento := Inventario.Type()
-	// 		// Aqui to tentando recuperar os valores dos alimentos...
-	// 		for i := 0; i < Inventario.NumField(); i++ {
-	// 			switch tipoAlimento.Field(i).Name {
-	// 			case "Agua":
-	// 				valorInventario := Inventario.Field(i)
-	// 				var v
-	// 				v = reflect.Value(valorInventario)
-	// 				fmt.Println(valorI)
-	// 				// if valorI > 0 {
-	// 				// }
-	// 			case "Comida":
-	// 				// valorInventario := Inventario.Field(i)
-	// 				// fmt.Println(valorInventario)
-	// 				// if valorInventario.Kind() == 0 {
-	// 				// 	fmt.Println("Não tem agua...")
-	// 				// }
-	// 			}
-	// 		}
-	// 	}
-	// 	if s.Codigo == codigoSobrevivente2 {
-	// 		// fmt.Println(s.Inventario)
-	// 	}
-	// }
-	// fmt.Println(troca.Sobrevivente1.Inventario)
-	// fmt.Println(troca.Sobrevivente2.Inventario)
+	if ComparaTroca(trocas) {
+		fmt.Println("ok vamos trocar...")
+	} else {
+		fmt.Println("não vamos.")
+	}
+}
 
+// ComparaTroca ...
+func ComparaTroca(trocas []Trocas) bool {
+	// agua := 4
+	// comida := 3
+	// medicamento := 2
+	// municao := 1
+	var s1Agua int
+	var s1Comida int
+	var s1Med int
+	var s1Mun int
+
+	var s2Agua int
+	var s2Comida int
+	var s2Med int
+	var s2Mun int
+
+	var somaS1 int
+	var somaS2 int
+
+	for _, s := range trocas {
+		s1Agua = s.Sobrevivente1.Inventario.Agua * 2
+		s1Comida = s.Sobrevivente1.Inventario.Comida * 2
+		s1Med = s.Sobrevivente1.Inventario.Medicamento * 2
+		s1Mun = s.Sobrevivente1.Inventario.Municao * 2
+
+		somaS1 = s1Agua + s1Comida + s1Med + s1Mun
+
+		s2Agua = s.Sobrevivente2.Inventario.Agua * 2
+		s2Comida = s.Sobrevivente2.Inventario.Comida * 2
+		s2Med = s.Sobrevivente2.Inventario.Medicamento * 2
+		s2Mun = s.Sobrevivente2.Inventario.Municao * 2
+
+		somaS2 = s2Agua + s2Comida + s2Med + s2Mun
+
+	}
+
+	if somaS1 != somaS2 {
+		return false
+	}
+	return true
 }
 
 // CheckError ...
