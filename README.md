@@ -1,6 +1,6 @@
 # ZSSN (Zombie Survival Social Network)
 
-## TEST BECKEND TO
+## TEST BACKEND TO
 
 **CODEMINERS42.COM**
 
